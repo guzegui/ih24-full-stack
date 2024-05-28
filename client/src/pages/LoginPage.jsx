@@ -1,9 +1,9 @@
 // src/pages/LoginPage.jsx
 
-import { useState, useContext } from "react"; // <== IMPORT useContext
+import { useState, useContext } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/auth.context";  // <== IMPORT
+import { AuthContext } from "../context/auth.context";
 
 const API_URL = "http://localhost:5005";
 
@@ -15,7 +15,8 @@ function LoginPage(props) {
   
   const navigate = useNavigate();
   
-  const { storeToken } = useContext(AuthContext);   //  <== ADD
+  /*  UPDATE - get authenticateUser from the context */
+  const { storeToken, authenticateUser } = useContext(AuthContext);
 
   
   const handleEmail = (e) => setEmail(e.target.value);
@@ -29,9 +30,13 @@ function LoginPage(props) {
     axios.post(`${API_URL}/auth/login`, requestBody)
       .then((response) => {
         console.log('JWT token', response.data.authToken );
-        
-        storeToken(response.data.authToken);       // <== ADD
       
+        // Save the token in the localStorage.      
+        storeToken(response.data.authToken);
+        
+        // Verify the token by sending a request 
+        // to the server's JWT validation endpoint. 
+        authenticateUser();                     // <== ADD
         navigate('/');
       })
       .catch((error) => {
