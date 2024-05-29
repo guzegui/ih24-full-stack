@@ -11,6 +11,15 @@ router.get("/:id", (req, res, next) => {
 
 router.put("/:id", (req, res, next) => {
   const { id } = req.params;
+  const updates = req.body;
+
+  User.findByIdAndUpdate(id, updates, { new: true }).then((updatedFruit) => {
+    res.json(updatedFruit);
+  });
+});
+
+router.patch("/:id", (req, res, next) => {
+  const { id } = req.params;
   const { name, email } = req.body;
 
   User.findByIdAndUpdate(id, { name, email }, { new: true }).then(

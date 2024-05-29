@@ -5,10 +5,7 @@ import { Container, Row, Col, Form, Button } from "react-bootstrap";
 function ProfilePage() {
   const API_URL = "http://localhost:5005";
   const [user, setUser] = useState({});
-  const [userData, setUserData] = useState({
-    name: "",
-    email: "",
-  });
+  const [userData, setUserData] = useState({});
 
   const storedToken = localStorage.getItem("authToken") || null;
 
@@ -54,14 +51,16 @@ function ProfilePage() {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    console.log(userData)
-
+    console.log(userData);
     axios
-      .put(`${API_URL}/user/${userId}`, userData, {
+      .patch(`${API_URL}/user/${userId}`, userData, {
         headers: { Authorization: `Bearer ${storedToken}` },
       })
       .then((response) => {
         console.log(response);
+        alert("Success");
+        setUserData({});
+        window.location.reload();
       })
       .catch((error) => {
         console.log(error);
