@@ -22,28 +22,29 @@ function ProfilePage() {
     const payload = JSON.parse(window.atob(base64));
 
     // Access the _id from the payload
-    const userId = payload._id;
-
-    console.log("User ID:", userId);
-    console.log("User toke:", storedToken);
-    console.log(`${API_URL}/user/${userId}`);
-
-    axios
-      .get(`${API_URL}/user/${userId}`, {
-        headers: { Authorization: `Bearer ${storedToken}` },
-      })
-      .then((response) => {
-        setUser(response.data);
-        console.log(response.data);
-      })
-      .catch((error) => console.log(error));
+    return payload._id;
   };
 
+  const userId = storedToken ? getIdFromToken(storedToken) : null;
+
   useEffect(() => {
-    if (storedToken) {
-      getIdFromToken(storedToken);
-    }
-  }, []);
+    const fetchUser = async () => {
+      if (userId) {
+        try {
+          const response = await axios.get(`${API_URL}/user/${userId}`, {
+            headers: { Authorization: `Bearer ${storedToken}` },
+          });
+          setUser(response.data);
+        } catch (error) {
+          console.log(`${API_URL}/user/${userId}`);
+
+          console.log(error.response ? error.response.data : error.message);
+        }
+      }
+    };
+
+    fetchUser();
+  }, [storedToken, userId]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -53,8 +54,10 @@ function ProfilePage() {
   const handleSubmit = (event) => {
     event.preventDefault();
 
+    console.log(userData)
+
     axios
-      .post(`${API_URL}/user/${userId}`, userData, {
+      .put(`${API_URL}/user/${userId}`, userData, {
         headers: { Authorization: `Bearer ${storedToken}` },
       })
       .then((response) => {
