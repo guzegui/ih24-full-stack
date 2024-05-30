@@ -1,47 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
+import { AuthContext } from "../context/auth.context";
 
 function ProfilePage() {
   const API_URL = "http://localhost:5005";
-  const [user, setUser] = useState({});
-  const [userData, setUserData] = useState({});
+  const { getToken, user, setUser } = useContext(AuthContext);
+  const [userData, setUserData] = useState({
+    name: user.name || "",
+    email: user.email || "",
+  });
 
-  const storedToken = localStorage.getItem("authToken") || null;
-
-  const getIdFromToken = (storedToken) => {
-    if (storedToken == null) return null;
-    // Extract the payload part of the JWT
-    const base64Url = storedToken.split(".")[1]; // Split the JWT into its parts and take the payload
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/"); // Convert base64url to base64
-
-    // Decode the base64 string to get the JSON payload
-    const payload = JSON.parse(window.atob(base64));
-
-    // Access the _id from the payload
-    return payload._id;
-  };
-
-  const userId = storedToken ? getIdFromToken(storedToken) : null;
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (userId) {
-        try {
-          const response = await axios.get(`${API_URL}/user/${userId}`, {
-            headers: { Authorization: `Bearer ${storedToken}` },
-          });
-          setUser(response.data);
-        } catch (error) {
-          console.log(`${API_URL}/user/${userId}`);
-
-          console.log(error.response ? error.response.data : error.message);
-        }
-      }
-    };
-
-    fetchUser();
-  }, [storedToken, userId]);
+  console.log(getToken());
+  console.log(user);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -51,16 +22,22 @@ function ProfilePage() {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    console.log(userData);
+    // Create a copy of userData without empty fields
+    const updatedData = {};
+    if (userData.name.trim() !== "") updatedData.name = userData.name;
+    if (userData.email.trim() !== "") updatedData.email = userData.email;
+
     axios
-      .patch(`${API_URL}/user/${userId}`, userData, {
-        headers: { Authorization: `Bearer ${storedToken}` },
+      .patch(`${API_URL}/user/${user._id}`, updatedData, {
+        headers: { Authorization: `Bearer ${getToken()}` },
       })
       .then((response) => {
         console.log(response);
+        console.log(response.data);
         alert("Success");
-        setUserData({});
-        window.location.reload();
+        console.log(user);
+        setUser({ ...user, ...updatedData });
+        setUserData({ name: "", email: "" });
       })
       .catch((error) => {
         console.log(error);
