@@ -6,6 +6,12 @@ import { AuthContext } from "../context/auth.context";
 function ProfilePage() {
   const API_URL = "http://localhost:5005";
   const { getToken, user, setUser } = useContext(AuthContext);
+  /*
+  The following approach ensures that the form fields are pre-populated 
+  with the user's current information. If user.name or user.email is not defined 
+  (e.g., they are null or undefined), it defaults to an empty string ''. 
+  This prevents React warnings about uncontrolled components.
+  */
   const [userData, setUserData] = useState({
     name: user.name || "",
     email: user.email || "",
